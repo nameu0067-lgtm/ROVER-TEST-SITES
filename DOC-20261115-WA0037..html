@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Earth Test Sites for Mars and Moon Rovers</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#eef2f9;--card:#fff;--line:#dde4f0;--tx:#16213a;--dim:#5d6b86;--ac:#4338ca;--tl:#0d9488;--rd:#e11d48;--soft:#eef0ff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font:16px/1.55 "Plus Jakarta Sans",system-ui,sans-serif;display:flex;flex-direction:column}
+h1,h2,h3{margin:0;line-height:1.25;font-weight:700}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--line)}
+header h1{font-size:1.1rem}
+header p{margin:0;color:var(--dim);font-size:.82rem;max-width:520px}
+.modes{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:999px}
+.mode{border:0;background:transparent;border-radius:999px;padding:7px 16px;display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+.mode b{font-size:.92rem}.mode small{font-size:.74rem;opacity:.75}
+.mode.on{background:var(--ac);color:#fff}
+button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;transition:background .15s,border-color .15s}
+button:hover{border-color:var(--ac)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}
+main{position:relative;flex:1;min-height:0}
+#map{position:absolute;inset:0;background:#dfe6f0}
+.bar{position:absolute;z-index:1000;top:12px;left:56px;right:462px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:14px;padding:8px 12px;box-shadow:0 6px 24px rgba(22,33,58,.12)}
+.grp{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.grp>span{color:var(--dim);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-right:2px}
+aside{position:absolute;z-index:1000;top:12px;right:12px;bottom:12px;width:438px;max-width:calc(100% - 24px);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 36px rgba(22,33,58,.18);display:flex;flex-direction:column;overflow:hidden}
+#panel{flex:1;overflow:auto;padding:18px 22px 28px}
+.ptabs{display:flex;gap:6px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--card)}.ptabs button{flex:1;font-weight:600}
+aside h2{font-size:1.3rem;margin-bottom:4px}
+.sub{color:var(--dim);margin:0 0 10px}
+.badge{display:inline-block;font-size:.78rem;font-weight:700;border-radius:999px;padding:3px 10px;margin:4px 0}
+.badge.t{background:#d9f5f0;color:#0b6b62}.badge.n{background:var(--soft);color:var(--ac)}
+.meter{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0 4px}
+.meter i{display:block;height:100%;background:var(--tl);border-radius:4px}
+.tabs{display:flex;gap:2px;margin:16px 0 12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:7px 10px;font-size:.88rem;color:var(--dim)}
+.tabs button.on{border-bottom-color:var(--ac);color:var(--ac);background:none}
+.sec{display:none}.sec.on{display:block}
+ul,ol{padding-left:18px;margin:6px 0}li{margin:5px 0}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem;margin:8px 0}
+th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--dim);font-weight:600}
+.dots{color:var(--tl);letter-spacing:1px;white-space:nowrap}
+.box{background:var(--bg);border-radius:12px;padding:12px 14px;margin:10px 0}
+.box b{color:var(--ac)}
+details summary{cursor:pointer;color:var(--ac);font-weight:700}
+.card{width:100%;text-align:left;display:block;margin:8px 0;border-radius:12px;padding:10px 14px}
+.card small{color:var(--dim);display:block}
+.ok{color:var(--tl);font-weight:700}.no{color:var(--line)}
+.go{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.go .big{background:var(--rd);border-color:var(--rd);color:#fff;font-weight:700}
+.log{list-style:none;padding:0}
+.log li{border-left:3px solid var(--line);padding:4px 10px;margin:6px 0;color:var(--dim)}
+.log li.done{border-color:var(--tl);color:var(--tx)}
+.log li.act{border-color:var(--ac);background:var(--soft);color:var(--tx);border-radius:0 8px 8px 0}
+.log b{color:var(--ac)}
+.pin{background:var(--ac);color:#fff;border:2px solid #fff;border-radius:50%;width:26px;height:26px;line-height:22px;text-align:center;font-weight:700;box-shadow:0 2px 8px rgba(22,33,58,.35)}
+.pin.c{background:var(--rd);width:30px;height:30px;line-height:26px}
+.pin.u{background:#a855f7;color:#fff}
+.rov{background:var(--tl);color:#fff;border:3px solid #fff;border-radius:8px;width:30px;height:30px;line-height:24px;text-align:center;font-weight:700;font-size:14px;box-shadow:0 0 0 6px rgba(13,148,136,.28);cursor:pointer}
+.leaflet-tooltip.dir{background:rgba(255,255,255,.95);color:var(--tx);border:1px solid var(--tl);font-size:12px}
+.rose{background:rgba(255,255,255,.92);color:var(--tx);border:1px solid var(--line);border-radius:50%;width:56px;height:56px;position:relative;font:700 11px "Plus Jakarta Sans",sans-serif}
+.rose span{position:absolute}.rose .n{top:2px;left:25px;color:var(--rd)}.rose .s{bottom:2px;left:25px}.rose .e{right:5px;top:21px}.rose .w{left:5px;top:21px}
+.rose:after{content:"";position:absolute;left:27px;top:14px;width:2px;height:28px;background:var(--dim)}
+footer{padding:6px 20px;background:var(--card);border-top:1px solid var(--line);color:var(--dim);font-size:.74rem}
+input:not([type=range]){width:100%;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;margin:3px 0 8px}
+label{display:block;font-size:.92rem}.go label{display:inline}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sl b{color:var(--ac);margin-left:6px}.sl input{width:100%;accent-color:var(--ac)}
+.mb{display:inline-block;width:56px;height:8px;background:var(--line);border-radius:4px;overflow:hidden}.mb i{display:block;height:100%;background:var(--tl)}
+#siteSel{min-width:240px;max-width:100%;font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+@media(max-width:1100px){.bar{right:12px;top:12px;left:56px}aside{top:auto;height:52%;bottom:12px}.bar+aside{}}
+@media(max-width:900px){body{height:auto}main{display:flex;flex-direction:column}#map{position:relative;inset:auto;height:55vh;order:1}.bar{position:static;order:0;border-radius:0;border-width:0 0 1px}aside{position:static;order:2;width:auto;max-width:none;margin:10px;border-radius:14px;box-shadow:none;height:auto}button{min-height:40px}.modes{width:100%;overflow-x:auto}#panel{overflow:visible}aside{display:block}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.mos{display:grid;grid-template-columns:repeat(3,1fr);border-radius:12px;overflow:hidden;margin:6px 0 14px}.mos img{width:100%;display:block;aspect-ratio:1;background:var(--line)}
+.gal{display:grid;grid-template-columns:1fr 1fr;gap:10px}.gal figure{margin:0}.gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:var(--line)}.gal figcaption{font-size:.74rem;color:var(--dim);margin-top:3px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Earth test sites for Mars and Moon rovers</h1>
+    <p>Pick a world, choose a site, tap the zones, then send the rover.</p>
+  </div>
+  <div class="modes" id="modes"></div>
+</header>
+<main>
+  <div id="map" aria-label="Interactive map"></div>
+  <div class="bar" role="toolbar" aria-label="Map controls">
+    <div class="grp" id="sites"></div>
+    <div class="grp" id="views"><span>Map view</span></div>
+    <div class="grp"><span>Overlays</span><button id="tDir" class="on">Directions</button><button id="tTrk" class="on">Rover track</button></div>
+  </div>
+  <aside><div class="ptabs"><button id="pSite" class="on">Site details</button><button id="pBest">Team’s best picks</button></div><div id="panel"></div></aside>
+</main>
+<footer>Match scores and ratings are qualitative estimates for learning and hackathon use. Zone positions are approximate search areas, and no elevation data is loaded yet: confirm sites with imagery and SRTM, ASTER and MODIS data. Imagery: Esri, OpenTopoMap, OpenStreetMap contributors.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const TS="Already tested: used in earlier analog and robotics work.";
+const NS="New candidate: not yet a standard analog site. This is a proposal that needs data checking.";
+const DATA={
+mars:{label:"Mars rover sites",tag:"8 sites, 5 new analogs",all:"All eight",
+FEAT:["Hyper-aridity","Volcanic basalt","Steep slopes","Sand and dunes","Salt / evaporites","Altitude (thin air)","Crater / caldera","Easy logistics","Ground ice / permafrost","Mineralogy / biosignatures"],
+KNOWN:[["Atacama",[3,1,1,2,3,2,0,2,0,2]],["Utah MDRS",[2,1,1,1,1,0,0,3,0,1]],["Devon Is.",[2,0,1,0,1,0,3,1,3,2]]],
+CRIT:[["Long-range autonomous driving",[0,3,5,7]],["Soft sand and dune mobility",[0,1,3,5,7]],["Rough volcanic rock and lava flows",[0,1,7]],["Steep slope climbing",[1,2,7]],["Crater / caldera descent and exit",[1,2,4,7]],["Salt crust, drilling and sampling",[2,3,5,6,7]],["Thin air, dust and temperature swings",[0,1,3,4,7]],["Radio shadow and comms limits",[1,2,4]],["Ground ice drilling",[4]],["Mineral and life-detection instruments",[2,3,6]]],
+sites:[
+{name:"Tibesti Massif Centre",short:"Massif centre",wp:"Tibesti Mountains",ev:0,c:[21.0,17.5],z:9,st:NS,role:"Long-distance driving and navigation",score:58,
+ sum:"A broad volcanic highland. Best for driving far across mixed ground.",
+ why:["Hyper-arid Saharan highland: dry, barren ground like Mars.","Basalt lava plateaus and cinder cones match Mars’s volcanic plains.","Dry river channels (wadis) look like ancient Martian valleys.","Dune edges give soft sand, the kind that trapped NASA’s Spirit rover in 2009."],
+ f:[3,3,2,2,1,2,2,0,0,1],edge:"Atacama has little volcanic rock and Utah’s site is small. The massif offers tens of kilometres of volcanic ground in one area.",
+ zones:[["Northern lava plateau",0,12,"Flat basalt plains.","Autonomous driving works over long distances with no human steering."],["Eastern dune fringe",90,15,"Soft sand.","The rover can escape sand traps and measure wheel slip."],["Southern cinder cones",180,10,"A cone field.","Camera navigation works when landmarks and rock hazards repeat."],["South-western dry channels",225,14,"Valley-like channels.","Obstacle detection works in terrain like ancient Martian river beds."]],path:[0,1,2,3]},
+{name:"Emi Koussi Volcano",short:"Emi Koussi",wp:"Emi Koussi",ev:0,c:[19.795,18.541],z:11,st:NS,role:"Slopes, altitude and volcanic terrain",score:67,
+ sum:"The highest peak in the Sahara (about 3,415 m) with a wide summit caldera.",
+ why:["Shield volcano with a caldera about 12 km across, like Martian volcano summits (much smaller).","Lava flows fan out in every direction: rock fields and slope tests.","High altitude means thin air and big day-night temperature swings.","Reddish, oxidised surfaces resemble Mars’s iron-rich soil."],
+ f:[3,3,3,2,1,3,3,0,0,1],edge:"Atacama lacks volcanoes, Utah lacks altitude, and Devon Island lacks sand. Emi Koussi combines volcanic rock, altitude and dunes.",
+ zones:[["Summit caldera (Era Kohor)",0,1,"A bowl about 12 km wide.","The rover can drive on a crater floor and plan a way out."],["Rim passes (Col Taitai, Gourlou)",110,6,"Named on the imagery. Steep ramps.","Slope limits and radio line-of-sight are measured on a crater rim."],["Southern flank lava flows",180,12,"Radial lava ridges.","The rover copes with rock fields and finds its tipping angle."],["Western sand fringe",270,20,"Orange dunes seen on the imagery.","Wheels hold up when hard rock gives way to soft soil."],["Tiribon cones (north-west)",315,14,"Volcanic cones labelled on the imagery.","Sampling works on broken, rocky ground."]],path:[0,1,2,3,4]},
+{name:"Trou au Natron Caldera",short:"Trou au Natron",wp:"Trou au Natron",ev:0,c:[20.958,16.393],z:12,st:NS,role:"Descent, salt ground and sampling",score:63,
+ sum:"A caldera roughly 8 km wide and about 1,000 m deep, with salt deposits on its floor.",
+ why:["Pale salt crust on the floor plays the role of Mars’s salt and mineral deposits.","Very steep inner walls test descent, recovery and tether-assist systems.","The deep bowl blocks radio signals, so it tests communication loss.","Dry, barren ground like Mars."],
+ f:[3,2,3,1,3,2,3,0,0,2],edge:"Devon Island has an impact crater but no volcanic salt floor. Atacama has salt flats but no deep caldera.",
+ zones:[["Northern rim approach",0,5,"The gentler side.","The rover can pick a safe starting point for a descent."],["Salt crater floor",0,1,"Pale salt crust.","Wheel grip, drilling and sampling work on brittle crust."],["Steep southern walls",180,4,"Very steep inner walls.","Slope limits and tether-assist recovery are proven."],["Eastern lava flows",90,12,"Dark lava fields.","Rough-rock driving works outside the crater."],["Western plateau",270,12,"Open ground.","Recovery drills and the drive-out are completed."]],path:[0,1,2,3,4]},
+{name:"Qaidam Basin (Dalangtan Playa), China",short:"Qaidam Basin",wp:"Qaidam Basin",c:[38.4,91.6],z:10,r:30,st:NS,ev:2,role:"Best all-round Mars analog: salt, yardangs, dunes",score:85,
+ sum:"The highest, driest big desert on Earth (about 2,700 to 3,300 m), with salt playas, wind-carved yardangs and dunes. Studied as a Mars analog since 2008.",
+ why:["Rain is under 20 mm a year and evaporation is about 2,590 mm, so it is hyperarid.","Thin air, big day-night swings and strong UV echo Mars.","Dalangtan Playa is about 44 km long and holds sulfates, chlorides and perchlorate, like salt-rich areas on Mars.","Yardangs cover about 20,000 km², with salt polygons, dunes, gullies and alluvial fans.","A Mars simulation base (Mars Village) stands in Da Qaidam, and the area has roads."],
+ f:[3,0,1,3,3,3,1,2,0,3],edge:"No volcanic rock or permafrost, but it combines salt, wind landforms, altitude and dryness better than any other site here.",
+ zones:[["Dalangtan playa floor",0,4,"Flat salt crust of sulfate and chloride minerals.","Wheel grip on crust and drill sampling of salts work."],["Salt-crust polygons",90,9,"Pan-like polygons from a few metres to over 300 m wide, with raised rims.","The rover crosses ridges and navigates repeating patterns."],["Yardang field",250,12,"Wind-carved ridges and corridors.","Mapping long corridors and avoiding dead ends works."],["Xiaoliang Mountain ring structures",303,19,"Ring-shaped uplifts on the imagery.","Climbs and geology mapping on unusual rock structures work."],["Barchan and linear dunes",150,12,"Moving sand dunes.","Soft-sand mobility and escape from sand traps are tested."],["Alluvial fans and dry gullies",200,16,"Fans and gullies shed from nearby mountains.","Loose-gravel slope climbing works."]],path:[0,1,4,5,2,3]},
+{name:"Haughton Crater, Devon Island, Canada",short:"Haughton Crater",wp:"Haughton impact structure",c:[75.37,-89.68],z:10,r:15,st:TS,ev:3,role:"Impact crater, permafrost and ground ice",score:80,
+ sum:"A 23 km impact crater, about 23 million years old, on a polar desert island with ice-rich permafrost. The Haughton-Mars Project has run field tests here since 1996.",
+ why:["Ice-cemented permafrost lets teams practise finding, drilling and sampling ground ice.","A crater about 23 km wide with breccia and melt rock shows how impacts reshape rock.","Cold, dry and nearly bare, so rovers see surface geology without plant cover.","Months of polar night and midnight sun, and no permanent residents, suit isolation and operations tests.","A hydrothermal system formed in the crater after impact, a model for habitable Mars spots."],
+ f:[2,0,1,0,1,0,3,1,3,2],edge:"Best for ice and operations. Rock is carbonate, not basalt, and it is 1 g with full air. Access is costly and the summer season is short.",
+ zones:[["Central uplift and crater floor",0,3,"Impact-lifted rock and breccia.","The rover handles breccia and melt rock."],["Crater rim hills",60,11,"The raised rim of a 23 km crater.","Rim slopes and traverse limits are measured."],["Permafrost polygon plains",160,8,"Ice-wedge polygons over ice-cemented ground.","Ice drilling and travel on patterned ground work."],["Gullies and valley edges",220,10,"Frost-shattered rock and gullies.","Gully navigation and slope hazards are tested."],["Base camp area (research station region)",250,7,"Approximate area of the long-running field base.","Power, comms and remote operations are planned."],["Frost-shattered rock fields",320,9,"Rubble of broken carbonate rock.","Rock-hazard detection works."]],path:[0,1,2,3,4,5]},
+{name:"Dhofar Desert (Marmul area), Oman",short:"Dhofar Desert",wp:"Dhofar Governorate",c:[18.1,55.3],z:10,r:20,st:TS,ev:2,role:"Mars terrain and simulated missions",score:72,
+ sum:"A barren gravel and dune desert in southern Oman, used for the AMADEE-18 Mars simulation in February 2018.",
+ why:["The Austrian Space Forum chose it for its Mars-like terrain and ran a four-week mission with about 200 scientists from 25 nations.","The test site spans about 120 square miles near the Marmul outpost.","Layered Paleocene and Eocene rock and salt domes echo Martian geology.","Edge of the Rub' al Khali (Empty Quarter) dunes gives soft sand.","Salalah is the nearest major town, so logistics are workable."],
+ f:[3,0,1,3,2,0,1,2,0,2],edge:"Little volcanic rock, no ice and low altitude. The exact AMADEE-18 site was kept private, so these positions are approximate.",
+ zones:[["Base camp gravel plain",0,2,"Flat, barren gravel desert near Marmul.","Camp layout, comms and long drives work."],["Layered rock outcrops",60,10,"Sedimentary layers of Paleocene and Eocene age.","Rover geology on layered rock works."],["Salt-dome ridges",130,12,"Low ridges lifted by salt.","Slope and rock-hazard tests run on uplifted ground."],["Dune sea edge",200,14,"Large dunes of the Empty Quarter.","Soft-sand mobility is tested."],["Dry wadi channels",270,10,"Dry river beds.","Channel navigation and radio line-of-sight are tested."],["Salt pans",330,12,"Flat salty ground (sabkha).","Crust trafficability and sampling work."]],path:[0,1,2,3,4,5]},
+{name:"Río Tinto, Spain",short:"Río Tinto",wp:"Rio Tinto (river)",c:[37.72,-6.56],z:12,r:6,st:TS,ev:3,role:"Mineralogy, extremophiles and biosignatures",score:66,
+ sum:"An acidic, iron-red river about 92 km long, rising at Peña de Hierro (689 m). NASA and Spain's Centro de Astrobiología drilled here in the MARTE project (2003 to 2006).",
+ why:["Average pH is about 2.3, and the water is rich in iron and heavy metals.","Hematite, jarosite and goethite match minerals found at Meridiani Planum on Mars.","Automated, sterile drilling of iron-sulfur sediments was demonstrated here.","Rich microbial life shows where biosignatures might hide in iron minerals.","Easy road access near Huelva in a mining region."],
+ f:[1,1,1,0,2,0,1,3,0,3],edge:"A small site with a Mediterranean climate. It is excellent for samples and instruments but weak for long drives, dust or cold.",
+ zones:[["Peña de Hierro source lake",20,1,"Acidic pit lake near the river's source.","Sample collection near acid water works."],["Evaporitic esplanade (drilling site)",110,2,"Iron- and sulfur-rich sediment beside a small stream.","Automated drilling and sample delivery are tested."],["Iron-oxide hills",200,3,"Red goethite and hematite rock.","Spectrometers are checked on Mars-like minerals."],["Red river reach",240,6,"Water coloured by ferric iron.","Life detection in acid water is practised."],["Open-pit mine slopes",300,4,"Terraced mine walls and tailings.","Slope driving on loose rubble works."]],path:[0,1,2,3,4]},
+{name:"Mojave Desert (Silver Lake to Death Valley), USA",short:"Mojave Desert",wp:"Mojave Desert",c:[35.35,-116.1],z:8,r:90,st:TS,ev:3,role:"Rocky terrain, dust and rover mobility",score:70,
+ sum:"A long-used NASA rover proving ground: Amboy Crater lava, dry lake beds, dunes and Death Valley.",
+ why:["Marsokhod rover tests at Amboy Crater in 1994 and a Mars-style mission on an ancient lake bed in 1999.","A test version of Curiosity (Scarecrow) drove on Dumont Dunes before landing.","JPL flew drones at Death Valley and Dumont Dunes for future Mars helicopters.","Death Valley has been a Mars analog since the 1970s Viking era.","Very easy access by road."],
+ f:[2,2,2,3,3,1,2,3,0,1],edge:"Warm, with vegetation and more rain than Mars. It is the best for proven rover mobility, but not for ice or extreme cold.",
+ zones:[["Silver Lake dry lake bed",0,3,"Flat ancient lake bed.","Autonomous driving and Mars-style mission drills run here."],["Alluvial fans near Baker",90,15,"Gravel fans and rocky aprons.","Rock-hazard detection and slope climbing work."],["Dumont Dunes",5,43,"A large dune field.","Dune driving, as used for the Curiosity test rover."],["Death Valley (Mars Hill and Mesquite Flats)",327,165,"Volcanic rock slopes and sand dunes.","Landing-system and rotorcraft navigation tests run here."],["Amboy Crater lava field",162,93,"Black basalt flows beside a cinder cone.","Rover mapping of two rock types is tested."]],path:[0,1,2,3,4]}
+]},
+moon:{label:"Moon rover sites",tag:"8 untested candidates",all:"All eight",
+FEAT:["Fresh basalt","Fine dusty soil","Steep slopes and craters","Boulder fields","Temperature swings","Barren ground","Lava tubes","Easy logistics"],
+KNOWN:[["Craters of Moon",[3,2,1,3,1,2,3,3]],["Mauna Kea",[3,3,2,2,2,3,2,2]],["Iceland",[3,2,1,2,3,1,3,2]]],
+NEED:[["Slopes and craters","20° to 25° or more, with crater-like bowls","ESA rover tests have gone past 25° on lunar simulant."],["Boulders and rocks","Rocks of 30 cm and larger, plus rubble","ESA rover tests used 30 cm obstacles."],["Fine dusty soil","Loose, fine, dark volcanic or pale pumice soil","NASA's outdoor lunar test bed uses about 500 tons of volcanic cinder simulant."],["Temperature swings","The widest day-night range available","The Moon swings by hundreds of degrees. Earth can only partly match it."],["Barren ground","Few plants, little shade, few landmarks","Plants confuse cameras and do not exist on the Moon."],["Easy logistics","Road or airstrip, power, comms, permission","A site is only useful if hardware can reach it."]],
+CRIT:[["Abrasive fine dust",[0,2,3,4,5,6,7]],["Steep crater-style slopes",[0,2,3,4,6]],["Boulder and rock-field driving",[0,1]],["Large temperature swings",[3,5,6,7]],["Barren, feature-poor ground",[0,1,2,5,6,7]],["Lava tubes (shelter)",[0]],["Long-distance navigation",[0,1,2,7]],["Easy to reach",[1,3,4,6]]],
+sites:[
+{name:"Harrat Khaybar, Saudi Arabia",short:"Khaybar",wp:"Harrat Khaybar",ev:0,c:[25.7,39.9],z:10,st:NS,role:"Basalt desert and long drives",score:75,
+ sum:"A large basalt lava field with cinder cones in a hot desert.",
+ why:["Wide dark basalt fields and many young cones.","Lava tubes are reported in Arabian lava fields.","Very dry and barren, but hot rather than lunar-cold.","Remote, so it needs careful planning."],
+ f:[3,2,2,3,2,3,2,1],fm:[3,3,2,2,1,0,2,1],edge:"A large, little-studied alternative to the Canary Islands, with room for long drives.",
+ zones:[["Basalt lava fields",0,10,"Dark lava plains.","Long drives over rock work."],["Cinder cone cluster",45,12,"Many young cones.","Cone slopes work as navigation landmarks."],["Lava tube zone",120,15,"Caves are reported in Arabian lava fields.","Tube entry is tested after a survey."],["Sandy dry valleys",200,14,"Dry valleys with sand.","Sand-to-rock transitions work."]],path:[0,1,2,3]},
+{name:"Harrat ash Shaam (Black Desert), Jordan",short:"Shaam",wp:"Harrat al-Shaam",ev:0,c:[32.0,37.0],z:9,st:NS,role:"Boulder fields and traction",score:63,
+ sum:"A huge flat plain covered in basalt cobble and boulders.",
+ why:["Dense basalt rocks are a clear hazard test.","Flat clay pans suit calibration drives.","Few steep slopes, so weaker for crater tests.","Road access is easier than at most sites here."],
+ f:[3,1,1,3,2,3,0,2],fm:[3,3,1,1,1,0,1,2],edge:"One of the largest boulder-strewn basalt areas on Earth.",
+ zones:[["Boulder plains",0,15,"Basalt rocks everywhere.","Hazard detection avoids rocks."],["Dry mud flats",90,18,"Flat clay pans.","Fast, flat calibration drives work."],["Eroded lava rims",180,15,"Broken lava edges.","Small slope climbs work."],["Old volcanic cones",270,20,"Scattered cones.","Cones work as landmarks."]],path:[0,1,2,3]},
+{name:"Tibesti volcanic field, Chad",short:"Tibesti",wp:"Tibesti Mountains",ev:0,c:[21.0,17.5],z:9,st:NS,role:"Rugged slopes and lava terrain",score:67,
+ sum:"Rugged volcanic cones and lava plateaus in the central Sahara.",
+ why:["Steep volcanic slopes and caldera walls.","Dark basalt plains and cinder cones.","Dune edges give soft sand.","Extremely remote and with security risks."],
+ f:[3,2,3,2,2,3,1,0],fm:[3,3,3,2,3,2,3,0],edge:"The best terrain variety on the list, but the hardest to reach.",
+ zones:[["Lava plateau",0,12,"Flat basalt plains.","Long autonomous drives work."],["Cinder cones",180,10,"A cone field.","Slope climbs on loose cinder work."],["Dune fringe",90,15,"Soft sand.","Wheel slip is measured."]],path:[0,1,2]},
+{name:"Wudalianchi, China",short:"Wudalianchi",wp:"Wudalianchi",ev:1,c:[48.7,126.2],z:10,st:NS,role:"Fresh cones and winter cold",score:71,
+ sum:"Young volcanic cones from eruptions in the early 1700s, with very cold winters.",
+ why:["Fresh basalt cones and lava flows.","Winters of about -20 to -30 °C test batteries.","Parts are forested, so the match is partial.","Reachable by road."],
+ f:[3,3,2,2,3,1,1,2],fm:[0,3,2,0,0,1,2,2],edge:"The only cold-winter volcanic field on this list, so the best cold-start test.",
+ zones:[["Laoheishan cone",0,3,"A young cone.","Sharp ash and a steep climb are managed."],["Huoshaoshan cone",70,5,"A second young cone.","Repeated cone climbs work."],["Blocky lava flows",150,8,"Rough lava, partly forested.","Rock navigation works despite vegetation."],["Winter snow plains",250,10,"Cold open ground.","Batteries survive the long cold."]],path:[0,1,2,3]},
+{name:"Lonar Crater, India",short:"Lonar",wp:"Lonar Lake",ev:2,c:[19.98,76.51],z:13,r:3,st:NS,role:"Basalt impact crater with easy access",score:66,
+ sum:"A simple bowl crater about 1.8 km wide and roughly 240 m deep, cut into Deccan basalt about 65 million years old, with a saline lake at the bottom.",
+ why:["One of only two known basalt impact craters on Earth, like craters on the lunar maria and Martian volcanic plains.","Its rock is plagioclase plus pyroxene, close to the minerals orbiters see on the Moon and Mars.","Age estimates range from about 50,000 to 570,000 years, so it is among the freshest craters on Earth.","Drill cores show post-impact hydrothermal alteration, a guide for Mars habitability.","Road access and a long research record make repeat visits cheap."],
+ f:[3,2,3,1,1,1,0,3],fm:[1,3,3,0,2,1,3,3],edge:"Warm, wet and weathered, with a lake, plants and 1 g. It is a wildlife sanctuary, Ramsar wetland and national geo-monument, so heavy equipment needs permission. Pair it with a cold, isolated site.",
+ zones:[["Crater rim",0,1,"An upturned, folded rim about 1.8 km across.","Rim driving and edge detection work on shocked basalt."],["Ejecta blanket",90,1.8,"Thickened outer edge of broken rock around the crater.","Rock fields and impact-glass sampling are practised."],["Inner crater wall",180,0.8,"A steep basalt wall about 240 m high.","Descent and climb-out are tested."],["Crater floor and lake",200,0.4,"Saline lake and marsh.","Soft-ground limits are found."],["Surrounding basalt plains",270,6,"Flat Deccan basalt country.","Long calibration drives work."]],path:[0,1,2,3,4]},
+{name:"Campo de Piedra Pomez, Argentina",short:"Piedra Pomez",wp:"Campo de Piedra Pomez",ev:1,c:[-26.6,-67.0],z:11,st:NS,role:"Fine pale dust and cold nights",score:58,
+ sum:"Pale pumice fields at about 3,500 m, with large day-night swings.",
+ why:["Fine, light-coloured dust like lunar highland soil.","Thin air and cold nights.","Gentle slopes, so weaker for climbing tests.","Remote high-altitude access."],
+ f:[1,3,1,2,3,3,0,1],fm:[3,1,1,3,0,3,1,1],edge:"The best fine-dust test on the list.",
+ zones:[["Pumice dunes",0,5,"Pale fine pumice.","Wheel sinkage and slip are measured."],["Rocky outcrops",90,6,"Wind-carved rock.","Obstacle detection works."],["High cold plain",200,10,"Thin air and cold nights.","Battery and heater endurance is proven."]],path:[0,1,2]},
+{name:"Spiti Valley, India",short:"Spiti",wp:"Spiti Valley",ev:0,c:[32.2,78.0],z:10,st:NS,role:"Steep scree and cold altitude",score:63,
+ sum:"A cold, barren high valley with steep loose slopes.",
+ why:["Steep scree slopes at 3,500 m and above.","Cold, dry and thin air.","Not volcanic, so rock type differs from the Moon.","Seasonal road access."],
+ f:[0,2,3,2,3,3,0,2],fm:[3,0,3,1,1,3,1,2],edge:"Similar to Hanle, with steeper loose slopes.",
+ zones:[["Scree slopes",0,6,"Loose steep slopes.","Climbing loose material works."],["Dry river bed",90,8,"Wide gravel bed.","Long drives work."],["High cold plateau",200,10,"Thin air, cold nights.","Cold-start behaviour is tested."]],path:[0,1,2]},
+{name:"Dasht-e Lut, Iran",short:"Lut",wp:"Dasht-e Lut",ev:0,c:[30.5,59.0],z:9,st:NS,role:"Heat stress and barren ground",score:50,
+ sum:"Dunes, rock ridges and salt flats with some of the hottest surface temperatures on Earth.",
+ why:["Extreme heat stresses thermal systems.","Almost no plants.","Little volcanic rock and few steep slopes.","Hard to access."],
+ f:[1,2,1,2,3,3,0,0],fm:[3,1,1,3,3,0,1,0],edge:"The strongest thermal stress test on the list.",
+ zones:[["Dune fields",0,15,"Large sand dunes.","Soft sand mobility works."],["Rock ridges",90,10,"Wind-carved ridges.","Rock navigation works."],["Salt flats",200,14,"Flat salt crust.","Heat and grip on crust are tested."]],path:[0,1,2]}]}};
+const OFFM=[
+{n:"Marius Hills",c:"13.4°N, 55.9°W",d:"Volcanic dome field on the Moon with a known lava-tube skylight.",f:[3,2,1,2,3,3,3,null]},
+{n:"Mare Tranquillitatis",c:"0.7°N, 23.5°E",d:"Dark basalt plain and the Apollo 11 site (1969). A collapse pit may open into a lava tube.",f:[3,3,0,1,3,3,2,null]},
+{n:"Taurus-Littrow valley",c:"20.2°N, 30.8°E",d:"Apollo 17 site (1972): a valley between steep massifs, covered in dark dust.",f:[3,3,2,2,3,3,0,null]},
+{n:"Shackleton crater",c:"about 89.9°S",d:"Crater about 21 km wide at the south pole. Its floor is in permanent shadow, and it is an Artemis region of interest.",f:[0,3,3,2,3,3,0,null]}];
+const OFFR=[
+{n:"Gale Crater",c:"5.4°S, 137.8°E",d:"Crater about 154 km wide with Mount Sharp rising about 5 km. Curiosity landed in 2012 and drove over Bagnold Dunes.",f:[3,2,2,3,2,2,3,null]},
+{n:"Jezero Crater",c:"18.4°N, 77.5°E",d:"Crater about 45 km wide with an ancient river delta. Perseverance landed in 2021.",f:[3,3,2,2,1,2,3,null]},
+{n:"Meridiani Planum",c:"2.0°S, 5.5°W",d:"Flat plain with hematite and sulfate rocks. Opportunity landed in 2004.",f:[3,2,0,3,3,2,2,null]},
+{n:"Olympus Mons",c:"18.7°N, 226.2°E",d:"Largest known volcano, about 22 km high, with a caldera about 80 km wide.",f:[3,3,2,0,0,3,3,null]}];
+function vsBody(wi,ai){
+ const s=D.sites[si],w=wi?[OFFR,s.fm,DATA.mars.FEAT]:[OFFM,s.f,DATA.moon.FEAT],a=w[0][ai],p=sim(w[1],a.f);
+ return '<div class="box"><b>'+a.n+'</b>: '+p+'% match<div class="meter"><i style="width:'+p+'%"></i></div><span class="sub">'+a.c+'. '+a.d+'</span></div>'
+ +'<div class="tw"><table><tr><th></th><th>Here</th><th>'+a.n.split(" ")[0]+'</th></tr>'+w[2].map((f,j)=>a.f[j]==null?'':'<tr><td>'+f+'</td><td>'+mb(w[1][j])+'</td><td>'+mb(a.f[j])+'</td></tr>').join("")+'</table></div>'}
+function vsSet(wi,ai){document.getElementById("vs"+wi).innerHTML=vsBody(wi,+ai)}
+function vs(s){
+ let h='<div class="sec"><p class="sub">Choose a real place on the Moon or Mars to see how closely '+s.short+' matches it. 100% means identical ratings.</p>';
+ [["Moon",OFFM,s.f],["Mars",OFFR,s.fm]].forEach((w,wi)=>{
+  const sc=w[1].map(a=>sim(w[2],a.f)),b=sc.indexOf(Math.max(...sc));
+  h+='<label for="sel'+wi+'"><b>'+w[0]+' area</b></label><select id="sel'+wi+'" onchange="vsSet('+wi+',this.value)" style="width:100%;margin:4px 0 8px;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit">'+w[1].map((a,i)=>'<option value="'+i+'"'+(i===b?' selected':'')+'>'+a.n+' ('+sc[i]+'%)'+(i===b?' - closest':'')+'</option>').join("")+'</select><div id="vs'+wi+'">'+vsBody(wi,b)+'</div>'});
+ return h+'<p class="sub">Ratings for off-world places are my rough estimates from public mission data, not measurements.</p></div>'}
+const mb=n=>n==null?"n/a":'<span class="mb"><i style="width:'+(n/3*100)+'%"></i></span>';
+function needs(){return '<div class="sec"><p class="sub">No single official NASA checklist was found. These are typical benchmarks from published rover tests.</p>'+D.NEED.map(n=>'<div class="box"><b>'+n[0]+'</b><br>'+n[1]+'<br><span class="sub">'+n[2]+'</span></div>').join('')+'</div>'}
+const dots=n=>n==null?"n/a":"●".repeat(n)+"○".repeat(3-n);
+const cmp=b=>["N","NE","E","SE","S","SW","W","NW"][Math.round(b/45)%8];
+const fc=c=>Math.abs(c[0]).toFixed(2)+"° "+(c[0]<0?"S":"N")+", "+Math.abs(c[1]).toFixed(2)+"° "+(c[1]<0?"W":"E");
+const hv=(a,b)=>{const t=x=>x*Math.PI/180,d=Math.sin(t(b[0]-a[0])/2)**2+Math.cos(t(a[0]))*Math.cos(t(b[0]))*Math.sin(t(b[1]-a[1])/2)**2;return 12742*Math.asin(Math.sqrt(d))};
+const fk=x=>x<10?x.toFixed(1):Math.round(x);
+function routeKm(s){const w=[s.c,...s.path.map(i=>dest(s.c,s.zones[i][1],s.zones[i][2])),s.c];let t=0;for(let i=0;i<w.length-1;i++)t+=hv(w[i],w[i+1]);return t}
+function dest([la,lo],b,km){const R=6371,d=km/R,t=b*Math.PI/180,p=la*Math.PI/180,l=lo*Math.PI/180;
+ const p2=Math.asin(Math.sin(p)*Math.cos(d)+Math.cos(p)*Math.sin(d)*Math.cos(t));
+ const l2=l+Math.atan2(Math.sin(t)*Math.sin(d)*Math.cos(p),Math.cos(d)-Math.sin(p)*Math.sin(p2));
+ return[p2*180/Math.PI,l2*180/Math.PI]}
+const cr=(a,b,c,d,t)=>[0,1].map(k=>.5*(2*b[k]+(-a[k]+c[k])*t+(2*a[k]-5*b[k]+4*c[k]-d[k])*t*t+(-a[k]+3*b[k]-3*c[k]+d[k])*t*t*t));
+
+const map=L.map("map").setView([20.5,17.5],7);
+const base={
+ "Satellite":L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:17,maxZoom:18,attribution:"Imagery &copy; Esri"}),
+ "Terrain":L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxNativeZoom:15,maxZoom:18,attribution:"&copy; OpenTopoMap, OpenStreetMap"}),
+ "Street":L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxNativeZoom:17,maxZoom:18,attribution:"&copy; OpenStreetMap contributors"})};
+let cur=base.Satellite.addTo(map);
+L.control.scale({imperial:false}).addTo(map);
+const rose=L.control({position:"topleft"});
+rose.onAdd=()=>{const d=L.DomUtil.create("div","rose");d.innerHTML='<span class="n">N</span><span class="s">S</span><span class="e">E</span><span class="w">W</span>';d.title="North is up";return d};
+rose.addTo(map);
+const grp=L.layerGroup().addTo(map);
+let M="moon",D=DATA.moon,si=-1,showDir=true,showTrk=true;
+const $=id=>document.getElementById(id),panel=$("panel"),sitesEl=$("sites"),viewsEl=$("views");
+function btn(p,t,fn,id){const b=document.createElement("button");b.textContent=t;b.onclick=fn;if(id!==undefined)b.dataset.id=id;p.appendChild(b);return b}
+const mark=(el,v,lab)=>el===sitesEl?($("siteSel")&&($("siteSel").value=String(v))):[...el.querySelectorAll("button")].forEach(b=>b.classList.toggle("on",lab?b.textContent===v:b.dataset.id===String(v)));
+Object.keys(base).forEach(k=>btn(viewsEl,k,()=>{map.removeLayer(cur);cur=base[k].addTo(map);mark(viewsEl,k,1)}));
+mark(viewsEl,"Satellite",1);
+$("tDir").onclick=e=>{showDir=!showDir;e.target.classList.toggle("on",showDir);draw()};
+$("tTrk").onclick=e=>{showTrk=!showTrk;e.target.classList.toggle("on",showTrk);draw()};
+Object.keys(DATA).forEach(m=>{const b=document.createElement("button");b.className="mode";b.dataset.m=m;b.innerHTML="<b>"+DATA[m].label+"</b><small>"+DATA[m].tag+"</small>";b.onclick=()=>setMode(m);$("modes").appendChild(b)});
+function setMode(m){M=m;D=DATA[m];[...$("modes").children].forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+ sitesEl.innerHTML='<span>Site</span><select id="siteSel" aria-label="Choose a site"><option value="-1">'+D.all+'</option>'+D.sites.map((s,i)=>'<option value="'+i+'">'+s.name+'</option>').join("")+'<option value="add">+ Add a place</option></select>';
+ $("siteSel").onchange=e=>{const v=e.target.value;v==="add"?openAdd():go(+v)};go(-1)}
+
+/* rover */
+let R=null;
+function buildTrack(s){
+ const w=[s.c,...s.path.map(i=>dest(s.c,s.zones[i][1],s.zones[i][2])),s.c],P=[];
+ w.forEach((p,i)=>{P.push(p);if(i<w.length-1){const q=w[i+1],sg=i%2?-1:1;P.push([(p[0]+q[0])/2+sg*.18*(q[1]-p[1]),(p[1]+q[1])/2-sg*.18*(q[0]-p[0])])}});
+ const N=16,line=[];
+ for(let i=0;i<P.length-1;i++)for(let j=0;j<N;j++)line.push(cr(P[Math.max(i-1,0)],P[i],P[i+1],P[Math.min(i+2,P.length-1)],j/N));
+ line.push(P[P.length-1]);
+ return{line,wp:w.map((_,k)=>2*k*N),w}}
+function rv(){return R}
+function stopRover(){if(R){cancelAnimationFrame(R.raf);R=null}}
+function startRover(){
+ if(si<0)return;const s=D.sites[si];
+ if(R&&R.run){R.run=false;cancelAnimationFrame(R.raf);$("pp").textContent="Resume rover";return}
+ if(R){R.run=true;R.t0=performance.now();R.raf=requestAnimationFrame(tick);$("pp").textContent="Pause rover";return}
+ const T=buildTrack(s);R={T,f:0,k:0,hold:0,run:true,sp:+($("spd")||{value:1}).value,t0:performance.now()};
+ R.m=L.marker(T.line[0],{icon:L.divIcon({className:"",html:'<div class="rov">R</div>',iconSize:[30,30],iconAnchor:[15,15]}),zIndexOffset:1000}).addTo(grp).on("click",startRover);
+ tab(2);log(0);$("pp").textContent="Pause rover";R.raf=requestAnimationFrame(tick)}
+function tick(now){
+ if(!R||!R.run)return;const dt=Math.min(now-R.t0,100);R.t0=now;
+ if(R.hold>0){R.hold-=dt}else{
+  const n=R.T.line.length-1;R.f+=dt/1000*(n/45)*R.sp;
+  if(R.f>=n){R.f=n;place();log(R.T.wp.length-1);R.run=false;$("pp").textContent="Replay mission";R.done=1;R=null;return}
+  place();const nk=R.k+1;if(nk<R.T.wp.length&&R.f>=R.T.wp[nk]){R.k=nk;R.f=R.T.wp[nk];log(nk);R.hold=2200}}
+ R.raf=requestAnimationFrame(tick)}
+function place(){const i=Math.floor(R.f),a=R.T.line[i],b=R.T.line[Math.min(i+1,R.T.line.length-1)],t=R.f-i;
+ const p=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];R.m.setLatLng(p);map.panInside(p,{padding:[90,90],animate:false})}
+function log(k){const items=document.querySelectorAll(".log li");items.forEach((li,j)=>{li.className=j<k?"done":j===k?"act":""});
+ if(items[k])items[k].scrollIntoView({block:"nearest",behavior:"smooth"});
+ const s=D.sites[si],last=k===items.length-1;
+ $("zc").innerHTML=k===0?"<b>Mission start</b><br>The rover leaves base camp at the site centre.":last?"<b>Mission complete</b><br>Every stop was tested. See the mission log for what each one proves.":"<b>Stop "+k+": "+s.zones[s.path[k-1]][0]+"</b><br>"+s.zones[s.path[k-1]][4]}
+
+function centerPin(s,i){return L.marker(s.c,{icon:L.divIcon({className:"",html:'<div class="pin c">★</div>',iconSize:[30,30],iconAnchor:[15,15]}),title:s.name}).on("click",()=>go(i))}
+function draw(){
+ stopRover();grp.clearLayers();
+ if(si<0){D.sites.forEach((s,i)=>centerPin(s,i).bindTooltip(s.short,{permanent:D.sites.length<4,direction:"right",className:"dir"}).addTo(grp));UP.forEach(u=>upin(u).addTo(grp));return}
+ const s=D.sites[si];centerPin(s,si).bindTooltip("Site centre (base camp)",{direction:"top",className:"dir"}).addTo(grp);
+ if(s.r)L.circle(s.c,{radius:s.r*1000,color:"#fff",weight:1.5,dashArray:"2 6",fill:false,opacity:.85,interactive:false}).addTo(grp);
+ if(showTrk)L.polyline(buildTrack(s).line,{color:"#e11d48",weight:3,dashArray:"8 6",opacity:.9}).addTo(grp);
+ s.zones.forEach((z,k)=>{const p=dest(s.c,z[1],z[2]);
+  if(showDir)L.polyline([s.c,p],{color:"#0d9488",weight:1.5,dashArray:"4 6"}).addTo(grp);
+  L.marker(p,{icon:L.divIcon({className:"",html:'<div class="pin">'+(k+1)+'</div>',iconSize:[26,26],iconAnchor:[13,13]}),title:z[0]})
+   .bindTooltip(showDir?z[0]+": "+cmp(z[1])+" "+z[1]+"°, "+z[2]+" km":z[0],{direction:"top",className:"dir"})
+   .on("click",()=>zone(k)).addTo(grp)})}
+
+function intro(){return '<details class="box"><summary>New here? Start with the basics</summary><ul><li><b>Analog site:</b> a place on Earth that looks or behaves like part of Mars or the Moon, so machines can be tested before an expensive launch.</li><li><b>Rover:</b> a robot vehicle that drives and collects samples.</li><li><b>Regolith:</b> the loose dust and rock on the Moon.</li><li><b>Caldera:</b> a big bowl left when a volcano collapses.</li><li><b>Basalt:</b> dark volcanic rock found on both worlds.</li></ul></details>'}
+function cover(){return '<div class="tw"><table><tr><th>Rover need</th>'+D.sites.map(s=>'<th>'+s.short.split(" ")[0]+'</th>').join("")+'</tr>'+D.CRIT.map(c=>'<tr><td>'+c[0]+'</td>'+D.sites.map((s,i)=>'<td class="'+(c[1].includes(i)?"ok":"no")+'">'+(c[1].includes(i)?"✓":"–")+'</td>').join("")+'</tr>').join("")+'</table></div>'}
+const badge=s=>'<span class="badge '+(s.st===TS?"t":"n")+'">'+s.st+'</span>';
+function tab(t){panel.querySelectorAll(".tabs button").forEach((x,k)=>x.classList.toggle("on",k===t));panel.querySelectorAll(".sec").forEach((x,k)=>x.classList.toggle("on",k===t))}
+
+function go(i){
+ si=i;addMode=false;if(pm){map.removeLayer(pm);pm=null}mark(sitesEl,i);draw();
+ if(i<0){const pts=D.sites.map(s=>s.c);map.flyToBounds(L.latLngBounds(pts).pad(.3),{duration:1.4});
+  panel.innerHTML='<h2>'+D.label+'</h2><p class="sub">'+(M==="mars"?"Together these sites cover every major test a Mars rover needs.":"All eight are new proposals that I know of. Each needs checking with data.")+'</p>'+intro()+D.sites.map((s,k)=>'<button class="card" onclick="go('+k+')"><b>'+s.name+'</b><small>'+(s.st===TS?"Already tested":"New candidate")+" · "+s.role+" · match about "+s.score+'%</small></button>').join("")+'<h3>What the sites cover</h3>'+cover();return}
+ const s=D.sites[i];map.flyTo(s.c,s.z,{duration:1.4});
+ const log=['<li class="act"><b>Start:</b> base camp at the site centre.</li>'].concat(s.path.map(k=>{const z=s.zones[k];return '<li><b>'+z[0]+'</b> ('+cmp(z[1])+" "+z[1]+"°, "+z[2]+" km)<br>"+z[3]+" <i>Proves:</i> "+z[4]+'</li>'})).concat(['<li><b>Return:</b> back to base camp with all stops tested.</li>']).join("");
+ panel.innerHTML='<h2>'+s.name+'</h2><p class="sub">'+fc(s.c)+' · '+s.role+'</p>'+badge(s)
+ +'<div>'+(M==="mars"?"Mars":"Moon")+' match (estimate): <b>'+s.score+'%</b></div><div class="meter"><i style="width:'+s.score+'%"></i></div><p>'+s.sum+'</p>'+intro()
+ +'<div class="go"><button class="big" id="pp">Send rover</button><button id="rs">Reset</button><label class="sub">Speed <select id="spd"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option></select></label></div>'
+ +'<div class="box" id="zc"><b>Zones</b><br>Tap a numbered pin, or press Send rover to follow the full track.</div>'
+ +'<div class="tabs"><button class="on">Why it matches</button><button>Compare</button><button>Rover mission</button><button>Coverage</button>'+(D.NEED?'<button>NASA needs</button>':'')+(s.fm?'<button>Vs Moon and Mars</button>':'')+'<button>Pictures</button></div>'
+ +'<div class="sec on"><ul>'+s.why.map(w=>"<li>"+w+"</li>").join("")+'</ul></div>'
+ +'<div class="sec"><p>Longer bars mean a stronger match, compared with known analog sites.</p><div class="tw"><table><tr><th></th><th>Here</th>'+D.KNOWN.map(k=>"<th>"+k[0]+"</th>").join("")+'</tr>'
+  +D.FEAT.map((f,j)=>"<tr><td>"+f+'</td><td>'+mb(s.f[j])+"</td>"+D.KNOWN.map(k=>'<td>'+mb(k[1][j])+"</td>").join("")+"</tr>").join("")
+  +'</table></div><div class="box"><b>What is different:</b> '+s.edge+'</div></div>'
+ +'<div class="sec"><p class="sub">The rover visits each stop in order. The log updates as it arrives. Planned route: about '+fk(routeKm(s))+' km as the crow flies.</p><ol class="log" style="counter-reset:x">'+log+'</ol></div>'
+ +'<div class="sec">'+cover()+'<p class="sub">A ✓ means the site is a strong place for that test.</p></div>'+(D.NEED?needs():'')+(s.fm?vs(s):'')+pics(s);
+ panel.querySelectorAll(".tabs button").forEach((b,k)=>b.onclick=()=>tab(k));
+ {const bs=panel.querySelectorAll(".tabs button");bs[bs.length-1].addEventListener("click",()=>loadPics(s))}
+ $("pp").onclick=startRover;$("rs").onclick=()=>{draw();go(si)};
+ $("spd").onchange=e=>{if(R)R.sp=+e.target.value};
+ panel.scrollTop=0}
+function zone(k){const s=D.sites[si],z=s.zones[k];
+ $("zc").innerHTML="<b>Zone "+(k+1)+": "+z[0]+"</b><br>"+cmp(z[1])+" of the centre ("+z[1]+"°), "+z[2]+" km away. "+z[3]+"<br><i>Proves:</i> "+z[4];
+ map.panTo(dest(s.c,z[1],z[2]));if(innerWidth<900)$("zc").scrollIntoView({behavior:"smooth",block:"center"})}
+let UP=[],addMode=false,pm=null;
+try{UP=JSON.parse(localStorage.getItem("rts2")||"[]").filter(u=>u.F)}catch(e){}
+const sv=()=>{try{localStorage.setItem("rts2",JSON.stringify(UP))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
+const sim=(a,b)=>{let t=0,n=0;a.forEach((v,i)=>{if(v!=null&&b[i]!=null){t+=Math.abs(v-b[i]);n++}});return n?Math.round(100*(1-t/(3*n))):null};
+const upin=u=>L.marker(u.c,{icon:L.divIcon({className:"",html:'<div class="pin u">+</div>',iconSize:[26,26],iconAnchor:[13,13]})}).bindTooltip(esc(u.n)+" (your place)",{direction:"top",className:"dir"});
+map.on("click",e=>{if(!addMode)return;$("an").value=e.latlng.lat.toFixed(3)+", "+e.latlng.lng.toFixed(3);if(pm)map.removeLayer(pm);pm=L.circleMarker(e.latlng,{radius:9,color:"#fff",fillColor:"#a855f7",fillOpacity:1}).addTo(map)});
+const KW={volc:/basalt|lava|volcan|cinder|scoria|magma|eruption/gi,ash:/\bash\b|cinder|scoria|tephra|pumice|pyroclast/gi,tube:/lava tube|lava cave|skylight|\bcaves?\b|tunnel/gi,dune:/\bdunes?\b|\bsand\b|\berg\b/gi,salt:/\bsalt\b|evaporite|natron|playa|brine|gypsum|sulfate|sulphate/gi,crat:/crater|caldera|impact structure/gi,forest:/forest|rainforest|jungle|vegetation|woodland|grassland/gi,acc:/national park|visitor|tourist|airport|highway|\broad|\bcity\b|\btown\b/gi};
+const cnt=(t,r)=>(t.match(r)||[]).length;
+const J=u=>fetch(u).then(r=>{if(!r.ok)throw 0;return r.json()});
+async function lookup(q){
+ const m=q.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/);let c,disp=q;
+ if(m)c=[+m[1],+m[2]];else{const g=await J("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q));if(!g.length)throw 0;c=[+g[0].lat,+g[0].lon];disp=g[0].display_name}
+ const la=c[0],lo=c[1],raw={disp},grid=[];
+ for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++)grid.push([la+i*.013,lo+j*.013/Math.max(.2,Math.cos(la*Math.PI/180))]);
+ const jobs=[
+  J("https://api.open-meteo.com/v1/elevation?latitude="+grid.map(p=>p[0].toFixed(4))+"&longitude="+grid.map(p=>p[1].toFixed(4))).then(d=>{const e=d.elevation;raw.el=e[12];let t=0,n=0;for(let i=0;i<5;i++)for(let j=0;j<5;j++){if(j<4){t+=Math.abs(e[i*5+j+1]-e[i*5+j]);n++}if(i<4){t+=Math.abs(e[(i+1)*5+j]-e[i*5+j]);n++}}raw.sl=Math.atan(t/n/1445)*180/Math.PI}).catch(()=>{}),
+  J("https://archive-api.open-meteo.com/v1/archive?latitude="+la+"&longitude="+lo+"&start_date=2022-01-01&end_date=2023-12-31&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto").then(d=>{const x=d.daily;raw.pr=x.precipitation_sum.reduce((a,b)=>a+(b||0),0)/2;raw.tmin=Math.min(...x.temperature_2m_min.filter(v=>v!=null));raw.tmax=Math.max(...x.temperature_2m_max.filter(v=>v!=null))}).catch(()=>{})];
+ if(!m)jobs.push(J("https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=1&prop=extracts&explaintext=1&exchars=12000&format=json&origin=*&gsrsearch="+encodeURIComponent(q)).then(d=>{const p=Object.values(d.query.pages)[0];raw.wt=p.title;raw.tx=p.extract||""}).catch(()=>{}));
+ await Promise.all(jobs);return{n:q,c,raw}}
+function feats(r,la){
+ const t=r.tx,k=(x,a,b,c)=>t==null?null:(n=>n>=c?3:n>=b?2:n>=a?1:0)(cnt(t,KW[x])),h=x=>x!=null,
+ ar=h(r.pr)?(r.pr<50?3:r.pr<150?2:r.pr<400?1:0):null,sl=h(r.sl)?(r.sl<3?0:r.sl<8?1:r.sl<15?2:3):null,
+ al=h(r.el)?(r.el>3000?3:r.el>1500?2:r.el>500?1:0):null,cold=h(r.tmin)?(r.tmin<-30?3:r.tmin<-15?2:r.tmin<-5?1:0):null,
+ cr=k("crat",1,3,6),vo=k("volc",1,3,6),ac=k("acc",1,2,4),L=Math.abs(la);
+ return{mars:[ar,vo,sl,k("dune",1,3,6),k("salt",1,3,6),al,cr,ac],
+  moon:[vo,k("ash",1,3,6),k("tube",1,2,4),sl==null?null:Math.min(3,sl+((cr||0)>=2?1:0)),cold,L>65?3:L>50?2:L>35?1:0,ar==null?null:Math.max(0,ar-(t!=null&&cnt(t,KW.forest)>=3?1:0)),ac]}}
+function openAdd(){
+ stopRover();si=-1;addMode=true;mark(sitesEl,"add");draw();
+ panel.innerHTML='<h2>Add a new place</h2><p class="sub">Type a place name, such as Danakil Depression, or tap the map. The page looks up its location, elevation, climate and description online, then compares it with all Mars and Moon sites.</p><label>Place name or coordinates<input id="an" placeholder="e.g. Danakil Depression, or 14.2, 40.3"></label><div class="go"><button class="big" id="cmp">Find and compare</button></div><div id="res"></div>'
+ +(UP.length?'<h3>Your places</h3>'+UP.map((u,i)=>'<div class="go"><button class="card" style="flex:1;margin:0" onclick="loadP('+i+')"><b>'+esc(u.n)+'</b><small>'+u.c[0].toFixed(3)+", "+u.c[1].toFixed(3)+'</small></button><button onclick="delP('+i+')">Remove</button></div>').join(""):"");
+ $("cmp").onclick=doCmp;$("an").onkeydown=e=>{if(e.key==="Enter")doCmp()};panel.scrollTop=0}
+async function doCmp(){
+ const q=$("an").value.trim();if(!q)return;
+ $("res").innerHTML='<div class="box">Looking up “'+esc(q)+'”. This can take a few seconds.</div>';
+ try{const r=await lookup(q);const P={n:r.n,c:r.c,raw:r.raw,F:feats(r.raw,r.c[0])};delete P.raw.tx;UP.push(P);sv();showRes(P)}
+ catch(e){$("res").innerHTML='<div class="box"><b>Could not find that place.</b> Check the spelling, add the country, or enter coordinates like 14.2, 40.3. If you are offline, reconnect and try again.</div>'}}
+function showRes(P){
+ if(pm){map.removeLayer(pm);pm=null}draw();
+ const W={mars:"Mars",moon:"Moon"},o=P.raw,v=(x,u,d)=>x==null?"n/a":x.toFixed(d||0)+u,
+ bar=x=>'<div>'+x.n+': <b>'+(x.p==null?"n/a":x.p+"%")+'</b></div><div class="meter"><i style="width:'+(x.p||0)+'%"></i></div>';
+ let best=null,h="";
+ ["mars","moon"].forEach(m=>{
+  const DD=DATA[m],f=P.F[m],r=DD.sites.map(s=>({n:s.name,p:sim(f,s.f),s})).sort((a,b)=>(b.p||0)-(a.p||0)),k=DD.KNOWN.map(x=>({n:x[0],p:sim(f,x[1])})).sort((a,b)=>(b.p||0)-(a.p||0)),t=r[0];
+  if(t.p!=null&&(!best||t.p>best.p))best={n:t.n,p:t.p,m};
+  h+='<h3>'+W[m]+' comparison</h3>'+(t.p==null?'<p class="sub">Not enough data to compare.</p>':'<div class="box">Closest site: <b>'+t.n+'</b> ('+t.p+'%). Closest known analog: <b>'+k[0].n+'</b> ('+k[0].p+'%).</div>'+r.map(bar).join("")+'<div class="tw"><table><tr><th></th><th>Found</th><th>'+t.s.short+'</th></tr>'+DD.FEAT.map((x,j)=>'<tr><td>'+x+'</td><td class="dots">'+dots(f[j])+'</td><td class="dots">'+dots(t.s.f[j])+'</td></tr>').join("")+'</table></div>')});
+ const top=DATA[M].sites.map(s=>({s,p:sim(P.F[M],s.f)})).sort((a,b)=>(b.p||0)-(a.p||0))[0].s;
+ L.polyline([P.c,top.c],{color:"#a855f7",weight:2,dashArray:"6 6"}).addTo(grp);
+ map.flyToBounds(L.latLngBounds([P.c,top.c]).pad(.4),{duration:1.2});
+ $("res").innerHTML='<div class="box"><b>'+esc(P.n)+'</b><br>'+esc(o.disp)+'<br>Elevation '+v(o.el," m")+' · mean slope '+v(o.sl,"°",1)+' · rain '+v(o.pr," mm/yr")+' · coldest day '+v(o.tmin," °C")+' · hottest day '+v(o.tmax," °C")+(o.wt?'<br>Description from: <a href="https://en.wikipedia.org/wiki/'+encodeURIComponent(o.wt.replace(/ /g,"_"))+'" target="_blank" rel="noopener" style="color:var(--tl)">'+esc(o.wt)+'</a>. Check that this is the right article.':'<br>No description was read, so rock and terrain features are n/a. Type a place name to include them.')+'</div>'
+ +(best?'<div class="box"><b>Best overall match:</b> '+best.n+' ('+W[best.m]+', '+best.p+'%)</div>':'')+h
+ +'<p class="sub">Found online: location (OpenStreetMap), elevation and climate (Open-Meteo, 2022 to 2023), description (Wikipedia). Ratings come from simple rules on these numbers and keywords, and n/a means no data. Compatibility is how closely the ratings agree: 100% means identical.</p>';
+ $("res").scrollIntoView({behavior:"smooth",block:"start"})}
+function loadP(i){const P=UP[i];openAdd();$("an").value=P.n;showRes(P)}
+function delP(i){UP.splice(i,1);sv();openAdd()}
+
+/* pictures */
+function T(c,z){const n=2**z,x=Math.floor((c[1]+180)/360*n),q=c[0]*Math.PI/180,y=Math.floor((1-Math.log(Math.tan(q)+1/Math.cos(q))/Math.PI)/2*n);let h="";
+ for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)h+='<img alt="" loading="lazy" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/'+z+'/'+(y+j)+'/'+(x+i)+'">';return'<div class="mos">'+h+'</div>'}
+function pics(s){return'<div class="sec"><p class="sub">Satellite pictures (Esri imagery) of the site, then photos from Wikipedia. Photos load when you open this tab.</p><b>Wide satellite view</b>'+T(s.c,Math.max(5,s.z-2))+'<b>Close satellite view</b>'+T(s.c,Math.min(16,s.z+1))+'<b>Photos</b><div id="ph" class="gal"><span class="sub">Loading photos…</span></div></div>'}
+async function loadPics(s){const el=$("ph");if(!el||el.dataset.d)return;el.dataset.d=1;
+ try{const d=await J("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=images&gimlimit=50&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=420&titles="+encodeURIComponent(s.wp||s.name));
+  const P=Object.values((d.query||{}).pages||{}).filter(p=>p.imageinfo&&/\.jpe?g$/i.test(p.title)&&!/map|locator|flag|logo|icon|diagram|chart|graph|coat|seal|commons|portrait/i.test(p.title)).slice(0,6);
+  el.innerHTML=P.length?P.map(p=>{const i=p.imageinfo[0],t=p.title.replace(/^File:/,"").replace(/\.\w+$/,"").replace(/_/g," "),a=i.extmetadata&&i.extmetadata.Artist?i.extmetadata.Artist.value.replace(/<[^>]*>/g,"").slice(0,40):"";
+   return'<figure><a href="'+esc(i.descriptionurl)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(i.thumburl)+'" alt="'+esc(t)+'"></a><figcaption>'+esc(t)+(a?" · "+esc(a):"")+'</figcaption></figure>'}).join(""):'<span class="sub">No photos were found for this place on Wikipedia. The satellite pictures above still show it.</span>'}
+ catch(e){el.innerHTML='<span class="sub">Photos need an internet connection. The satellite pictures above still show the site.</span>'}}
+
+/* team's best picks */
+const pickScore=s=>.7*s.score+15*(s.f[7]/3)+15*((s.ev||0)/3);
+function best(){let h='<h2>Team’s best picks</h2><p class="sub">The five places I rate most likely to work for rover tests on each world. Pick score = 70% match to the world + 15% easy access + 15% track record of earlier tests. These are my judgment-based estimates, so check them with data.</p>';
+ [["mars","Mars"],["moon","Moon"]].forEach(([m,w])=>{
+  const R=DATA[m].sites.map((s,i)=>({s,i,p:pickScore(s)})).sort((a,b)=>b.p-a.p||b.s.f[0]-a.s.f[0]).slice(0,5);
+  h+='<h3 style="margin-top:18px">'+w+': top 5</h3>'+R.map((x,k)=>'<button class="card" onclick="openPick(\''+m+'\','+x.i+')"><b>'+(k+1)+'. '+x.s.name+'</b> <span class="ok">'+Math.round(x.p)+'%</span><div class="meter"><i style="width:'+x.p+'%"></i></div><small>'+x.s.role+'</small><small>Match '+x.s.score+'% · Access '+x.s.f[7]+'/3 · Track record '+(x.s.ev||0)+'/3</small></button>').join("")});
+ return h+'<p class="sub">Tap a place to open it on the map.</p>'}
+function openPick(m,i){if(M!==m)setMode(m);go(i)}
+function setPT(k){$("pSite").classList.toggle("on",k==="site");$("pBest").classList.toggle("on",k==="best")}
+const _go=go;go=function(i){setPT("site");return _go(i)};
+const _oa=openAdd;openAdd=function(){setPT("site");return _oa()};
+$("pSite").onclick=()=>go(si);
+$("pBest").onclick=()=>{setPT("best");stopRover();panel.innerHTML=best();panel.scrollTop=0};
+setMode("moon");
+</script>
+</body>
+</html>
